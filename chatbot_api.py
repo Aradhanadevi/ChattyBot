@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import pickle
+import os
 
 # Load model and vectorizer
 with open('chat_model.pkl', 'rb') as f:
@@ -24,5 +25,7 @@ def chat():
 
     return jsonify({'reply': prediction})
 
+# ✅ Only run ONCE with dynamic port (for Render)
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
