@@ -1,6 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, make_response
 import pickle
 import os
+import sys
+import json
+
+sys.stdout.reconfigure(encoding='utf-8')  # 👈 Ensures server uses UTF-8
 
 # Load model pipeline (includes vectorizer + model)
 with open('chat_model.pkl', 'rb') as f:
@@ -14,12 +18,14 @@ def chat():
     user_message = data.get('message', '')
 
     if not user_message:
-        return jsonify({'reply': "Please say something 🥲"})
+        reply = "Please say something 🥲"
+    else:
+        reply = model.predict([user_message])[0]
 
-    # Just predict directly
-    prediction = model.predict([user_message])[0]
-
-    return jsonify({'reply': prediction})
+    # ✅ Ensure UTF-8 JSON with emojis
+    response = make_response(json.dumps({'reply': reply}, ensure_ascii=False))
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response
 
 # ✅ Dynamic port for Render
 if __name__ == '__main__':
